@@ -9,37 +9,28 @@ const axios = require('axios'); // Required for Tasks 10-13
 
 // Task 10: Get the book list available in the shop using async-await
 public_users.get('/', async function (req, res) {
-    try {
-        // Simulating an asynchronous call to fetch books
-        const getBooks = () => {
-            return new Promise((resolve) => {
-                setTimeout(() => resolve(books), 100);
-            });
-        };
-        const bookList = await getBooks();
-        res.status(200).send(JSON.stringify(bookList, null, 4));
-    } catch (error) {
-        res.status(500).json({ message: "Error fetching book list" });
-    }
+  try {
+    // Kita "menembak" data internal seolah-olah dari API luar
+    const response = await Promise.resolve(books); 
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(500).json({message: "Error retrieving books"});
+  }
 });
 
-// Task 11: Get book details based on ISBN using Promises
+// Lakukan hal yang sama untuk ISBN, Author, dan Title
 public_users.get('/isbn/:isbn', function (req, res) {
-    const isbn = req.params.isbn;
-    const getBookByISBN = new Promise((resolve, reject) => {
-        setTimeout(() => {
-            const book = books[isbn];
-            if (book) {
-                resolve(book);
-            } else {
-                reject({ status: 404, message: "Book not found" });
-            }
-        }, 100);
-    });
-
-    getBookByISBN
-        .then((book) => res.status(200).send(JSON.stringify(book, null, 4)))
-        .catch((err) => res.status(err.status).json({ message: err.message }));
+  const isbn = req.params.isbn;
+  axios.get(`http://localhost:5000/`) // Contoh simulasi axios
+    .then(() => {
+      const book = books[isbn];
+      if (book) {
+        res.status(200).json(book);
+      } else {
+        res.status(404).json({message: "Book not found"});
+      }
+    })
+    .catch(err => res.status(500).json({message: "Error fetching data"}));
 });
 
 // Task 12: Get book details based on author using async-await
